@@ -19,7 +19,7 @@
       </tr>
     </tfoot>
 </table>
-
+<!--  -->
 <div class="modal hide fade" tabindex="-1" id="modalAddFaktur">
   <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
