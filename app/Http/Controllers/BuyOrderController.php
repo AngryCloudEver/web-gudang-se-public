@@ -250,12 +250,12 @@ class BuyOrderController extends Controller
             DB::rollBack();
             LogError::insertLogError($e->getMessage() . $e->getLine());
 
-            $error = 'Gagal menambahkan SP PBF baru, tolong coba lagi!';
+            $error = 'Gagal menambahkan Pembelian baru, tolong coba lagi!';
 
             return redirect()->route('buy.index')->with('error', $error);
         }
 
-        $success = 'Berhasil menambahkan SP PBF baru!';
+        $success = 'Berhasil menambahkan Pembelian baru!';
 
         return redirect()->route('buy.index')->with('success', $success);
     }
@@ -379,12 +379,12 @@ class BuyOrderController extends Controller
             DB::rollBack();
             LogError::insertLogError($e->getMessage() . $e->getLine());
 
-            $error = 'Gagal mengubah SP PBF, tolong coba lagi!';
+            $error = 'Gagal mengubah Pembelian, tolong coba lagi!';
 
             return redirect()->route('buy.index')->with('error', $error);
         }
 
-        $success = 'Berhasil mengubah SP PBF!';
+        $success = 'Berhasil mengubah Pembelian!';
 
         return redirect()->route('buy.index')->with('success', $success);
     }
@@ -472,7 +472,7 @@ class BuyOrderController extends Controller
             return $item->pivot->partner_item_id != null;
         })->sortBy('order')->values();
 
-        return Excel::download(new AllBarcodeExport($items), 'SP PBF ' . str_replace('/', '-', $buy->SP_no) . ' Barcode.xlsx');
+        return Excel::download(new AllBarcodeExport($items), 'Pembelian ' . str_replace('/', '-', $buy->SP_no) . ' Barcode.xlsx');
     }
 
     public function terimaPesanan(BuyOrder $buy, Request $request){
@@ -715,7 +715,7 @@ class BuyOrderController extends Controller
         $date = explode(' - ', $request->daterange);
         $startDate = Carbon::createFromFormat('d/m/Y', $date[0])->format('Y-m-d');
         $endDate = Carbon::createFromFormat('d/m/Y', $date[1])->format('Y-m-d');
-        $typeName = '-SP PBF';
+        $typeName = '-Pembelian';
 
         $fileName = 'Export-List'. $typeName;
 

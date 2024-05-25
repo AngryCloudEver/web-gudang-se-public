@@ -20,9 +20,9 @@
     <div class="content_header">
         <h1>List Mitra</h1>
         <div>
-            <a href="{{ route('mitra.export-all') }}" class="btn btn-success mb-3">
+            {{-- <a href="{{ route('mitra.export-all') }}" class="btn btn-success mb-3">
                 <span class="fas fa-print mr-2"></span>Export List Mitra
-            </a>
+            </a> --}}
             <a href="{{ route('mitra.create') }}" class="btn btn-primary mb-3">
                 <span class="fas fa-plus mr-2"></span>Tambah Mitra
             </a>

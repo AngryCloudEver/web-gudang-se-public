@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'List Stok Obat')
+@section('title', 'List Stok Item')
 
 @section('content_header')
     @isset($error)
@@ -18,7 +18,7 @@
         </div>
     @endisset
     <div class="content_header">
-        <h1>List Stock Obat</h1>
+        <h1>List Stock Item</h1>
         <div class="right_header">
             @if($type == 'hq')
             <a href="{{ route('item.stock.export') }}" class="btn btn-success mb-3">
@@ -33,9 +33,6 @@
                     <input type="file" name="file" id="file" onchange="this.form.submit()" hidden>
                 </div>
             </form>
-            <a href="{{ route('item.stock.create') }}" class="btn btn-primary mb-3 ml-2">
-                <span class="fas fa-plus mr-2"></span>Tambah Stock Gudang Pusat
-            </a>
             @elseif($type == 'partner')
             <button class="btn btn-success mb-3 mr-2" id="exportStockMitra">
                 <span class="fas fa-file-excel mr-2"></span>Export Stock Mitra

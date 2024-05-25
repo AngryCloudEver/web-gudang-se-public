@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Order Baru')
+@section('title', 'Tambah Order Pembelian Baru')
 
 @section('content_header')
     <div class="content_header">
-        <h1>Tambah Order Baru ke PBF</h1>
+        <h1>Tambah Order Baru ke Pembelian</h1>
     </div>
 @endsection
 
@@ -50,7 +50,7 @@
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <label for="supplierId" style="display: block;">PBF:</label>
+                            <label for="supplierId" style="display: block;">Supplier:</label>
                             <select class="form-control" id="supplierId" name="supplierId">
                                 @foreach ($suppliers as $supplier)
                                 <option value="{{ $supplier->id }}">{{ $supplier->supplier_code . ' - ' . $supplier->name }}</option>
@@ -80,7 +80,7 @@
                     <div class="col-sm-4">
                         <div class="form-group">
                             <label for="listPembelian" class="btn btn-success mb-3">
-                                <span class="fas fa-plus mr-2"></span>Import List SP PBF
+                                <span class="fas fa-plus mr-2"></span>Import List Pembelian
                             </label>
                             <input type="file" name="listPembelian" id="listPembelian" hidden>
                         </div>
@@ -584,7 +584,7 @@
                 if(alert){
                     swal.fire(
                         'Gagal!',
-                        'Faktur sedang digunakan dalam list SP PBF, pastikan tidak ada yang menggunakan faktur ini sebelum menghapus!',
+                        'Faktur sedang digunakan dalam list Pembelian, pastikan tidak ada yang menggunakan faktur ini sebelum menghapus!',
                         'error'
                     );
                 }else{

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'List Master Obat')
+@section('title', 'List Master Item')
 
 @section('content_header')
     @isset($error)
@@ -25,10 +25,10 @@
         </div>
     @endif
     <div class="content_header">
-        <h1>List Master Obat</h1>
+        <h1>List Master Item</h1>
         <div class="right_header">
             <a href="{{ route('item.sku.export') }}" class="btn btn-success mr-2">
-                <span class="fas fa-file-excel mr-2"></span>Export SKU
+                <span class="fas fa-file-excel mr-2"></span>Export Item
             </a>
             <form action="{{ route('item.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf

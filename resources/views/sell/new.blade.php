@@ -10,6 +10,8 @@
 @section('title', 'Tambah Retur Baru')
 @endif
 
+@section('plugins.BsCustomFileInput', true)
+
 @section('content_header')
     <div class="content_header">
         <h1>Tambah {{ $type == 'Reguler' ? 'Penjualan' : '' }} {{ $type }}</h1>
@@ -37,7 +39,7 @@
                     <div class="col-sm-3" style="display: none;">
                     @endif
                         <div class="form-group">
-                            <label for="partnerSourceId">Pilih Klinik Sumber</label>
+                            <label for="partnerSourceId">Pilih Mitra Sumber</label>
                             <select class="form-control" id="partnerSourceId" name="partnerSourceId">
                                 @foreach ($sourcePartners as $partner)
                                 <option value="{{ $partner->id }}">{{ $partner->clinic_id . ' - ' . $partner->name }}</option>
@@ -47,7 +49,7 @@
                     </div>
                     <div class="col-sm-3">
                         <div class="form-group">
-                            <label for="partnerDestinationId">Pilih Klinik Tujuan</label>
+                            <label for="partnerDestinationId">Pilih Mitra Tujuan</label>
                             <select class="form-control" id="partnerDestinationId" name="partnerDestinationId">
                                 @foreach ($destinationPartners as $partner)
                                 <option value="{{ $partner->id }}">{{ $partner->clinic_id . ' - ' . $partner->name }}</option>
@@ -68,12 +70,12 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-sm-2">
+                    {{-- <div class="col-sm-2">
                         <div class="form-group">
                             <label for="id_request">Id Permintaan</label>
                             <input type="text" name="id_request" id="id_request" class="form-control" placeholder="Masukkan Id Permintaan...">
                         </div>
-                    </div>
+                    </div> --}}
                     @endif
                     @if($type == 'Konsinyasi')
                     <div class="col-sm-2">
@@ -153,10 +155,7 @@
                 @if($type == 'Retur')
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="surat_jalan_result">Upload Hasil Bukti Retur</label>
-                                <input type="file" name="surat_jalan_result" id="surat_jalan_result" class="form-control">
-                            </div>
+                            <x-adminlte-input-file name="surat_jalan_result" id="surat_jalan_result" placeholder="Choose a file..." label="Upload Hasil Bukti Retur" required/>
                         </div>
                     </div>
                 @endif

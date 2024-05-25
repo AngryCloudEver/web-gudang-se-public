@@ -103,7 +103,6 @@ class SellOrderController extends Controller
 
                             $dt->total_price = 'Rp '.number_format($dt->total_price, 2);
                             $dt->due_at2 = $dt->due_at;
-                            $dt->id_request = $dt->id_request ?? '-';
 
                             if($dt->status_id != 'Cancel'){
                                 $dt->path = $dt->path == null ? 'Invoice Belum Dibuat' : 'Invoice Sudah Dibuat';
@@ -298,117 +297,6 @@ class SellOrderController extends Controller
         return view('sell.index', compact('route', 'success', 'error', 'type', 'listMitra', 'listBatch', 'sourcePartners'));
     }
 
-    public function indexPermintaan(Request $request){
-        $type = $request->type;
-
-        if($request->ajax()){   
-            $type = $request->type;
-
-            $consignmentRequests = ConsignmentRequest::orderBy('created_at', 'DESC')
-                        ->where('type', $type)
-                        ->get()
-                        ->transform(function ($dt) {
-                            $dt->nama_klinik = $dt->partner->clinic_id . ' - ' . $dt->partner->name;
-                            $dt->tanggal_buat = $dt->created_at;
-                            $dt->nama_sales = $dt->partner->sales_name;
-                            $dt->status_name = $dt->status->name;
-                            $dt->request_date = $dt->items[0]->pivot->request_date;
-                            $dt->deliver_date = $dt->items[0]->pivot->deliver_date;
-
-                            // Ambil ID Pengiriman
-                            $send_id = SellOrder::select('document_number')
-                                        ->where('status_id', '!=', '3')
-                                        ->where('id_request', $dt->id_request)
-                                        ->whereIn('sell_order_type_id', [1, 2])
-                                        ->first();
-                            $dt->send_id = @$send_id->document_number ?? '-';
-
-                            return $dt;
-                        });
-
-            return DataTables::of($consignmentRequests)
-                ->addColumn('actions', function ($p) use ($type) {
-                    $returnedValue = [];
-                    
-                    array_push($returnedValue, [
-                        "route" => route('sell.permintaan.show', ['consignmentRequest' => $p->id, 'type' => $type]),
-                        "attr_id" => $p->id,
-                        "icon" => 'fas fa-fw fa-cube',
-                        "label" => 'Detail',
-                        "btnStyle" => 'primary'
-                    ]);
-
-                    if($p->status_name != 'Cancel' && $p->status_name != 'Complete'){
-                        array_push($returnedValue, [
-                            "route" => route('sell.permintaan.edit', ['consignmentRequest' => $p->id, 'type' => $type]),
-                            "attr_id" => $p->id,
-                            "icon" => 'fas fa-fw fa-edit',
-                            "label" => 'Edit',
-                            "btnStyle" => 'info'
-                        ]);
-
-                        array_push($returnedValue, [
-                            "route" => route('sell.permintaan.cancel', ['consignmentRequest' => $p->id]),
-                            "attr_id" => $p->id,
-                            "icon" => 'fas fa-fw fa-trash',
-                            "label" => 'Cancel',
-                            "btnStyle" => 'danger'
-                        ]);
-                    }
-
-                    return $returnedValue;
-                })
-                ->editColumn('request_date', function ($p) {
-                    if($p->request_date != null){
-                        return [
-                            'display' => date('d-m-Y', strtotime($p->request_date)),
-                            'timestamp' => date('Y-m-d', strtotime($p->request_date))
-                        ];
-                    }
-                    else{
-                        return [
-                            'display' => '-',
-                            'timestamp' => '-'
-                        ];
-                    }
-
-                    return null;
-                })
-                ->editColumn('deliver_date', function ($p) {
-                    if($p->deliver_date != null){
-                        return [
-                            'display' => date('d-m-Y', strtotime($p->deliver_date)),
-                            'timestamp' => date('Y-m-d', strtotime($p->deliver_date))
-                        ];
-                    }
-                    else{
-                        return [
-                            'display' => '-',
-                            'timestamp' => '-'
-                        ];
-                    }
-
-                    return null;
-                })
-                ->make();
-        }
-
-        $success = session('success') ?? null;
-        $error = session('error') ?? null;
-
-        $route = 'sell.permintaan.index';
-
-        $listNameMitra = Partner::select('name', 'clinic_id')->where('id', '!=', 1)->get();
-
-        $listMitra = collect();
-
-        foreach($listNameMitra as $mitra){
-            $listMitra[$mitra->name] = $mitra->name;
-        }
-
-        return view('sell.permintaan.index', compact('route', 'success', 'error', 'type'));
-    }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -578,7 +466,6 @@ class SellOrderController extends Controller
         $items = json_decode($request->items);
         $description = $request->description;
         $kodeKonsinyasi = $request->kodeKonsinyasi ?? $sell->status_kode;
-        $id_request = $request->id_request ?? null;
 
         DB::beginTransaction();
         try{
@@ -590,7 +477,6 @@ class SellOrderController extends Controller
                 
                 $idPengiriman = $request->idOrder;
                 $sell->document_number = $idPengiriman;
-                $sell->id_request = $request->id_request;
                 $sell->created_at = $request->created_at;
                 $sell->delivered_at = $request->delivered_at;
             }
@@ -643,7 +529,6 @@ class SellOrderController extends Controller
             }
 
             $sell->total_price = $totalPrice;
-            $sell->id_request = $id_request ?? null;
 
             if($sell->sellOrderType->id == 4){
                 $sell->returned_at = @$request->returDate;
@@ -694,24 +579,6 @@ class SellOrderController extends Controller
         else{
             $success = 'Berhasil mengedit retur!';
             return redirect()->route('sell.index', ['type' => 'Retur'])->with('success', $success);
-        }
-    }
-
-    public function getRequestConsignment(Request $request){
-        if($request->ajax()){
-            $requestKonsinyasi = ConsignmentRequest::where('status_id', 5)->where('partner_id', $request->destinationPartnerId)->get();
-            $options = [];
-    
-            foreach ($requestKonsinyasi as $cons){
-                $options[] = [
-                    'id' => $cons->id,
-                    'text' => '#' . $cons->id_request . ' - ' . $cons->partner->name . ' (' . $cons->partner->clinic_id . ')'
-                ];
-            }
-
-            return response()->json([
-                'results' => $options,
-            ]);
         }
     }
 
@@ -874,7 +741,6 @@ class SellOrderController extends Controller
         $partnerDestinationId = $request->partnerDestinationId;
         $description = $request->description;
         $kodeKonsinyasi = $request->kodeKonsinyasi ?? null;
-        $id_request = $request->id_request ?? null;
 
         if($partnerSourceId == 1){
             $jenisPenjualan = $request->jenisPenjualan;
@@ -1024,7 +890,6 @@ class SellOrderController extends Controller
                 'total_price' => 0,
                 'description' => $description,
                 'document_number' => $documentNumber ?? null,
-                'id_request' => $id_request ?? null
             ]);
 
             $totalPrice = 0;
@@ -1088,52 +953,6 @@ class SellOrderController extends Controller
             $success = 'Berhasil menambahkan retur baru!';
             return redirect()->route('sell.index', ['type' => 'Retur'])->with('success', $success);
         }
-    }
-
-    public function storePermintaan(Request $request)
-    {   
-        $items = json_decode($request->items);
-        $partnerId = $request->partnerId;
-        
-        DB::beginTransaction();
-        try{
-            if($request->file('path_surat_permohonan_klinik')){
-                if($image = $request->file('path_surat_permohonan_klinik')){
-                    $destPath = 'surat_permohonan_klinik/';
-                    $fileName = date('YmdHis') . '-Surat-Permohonan-Klinik.' . $image->getClientOriginalExtension();
-                    Storage::disk('public')->put($fileName, file_get_contents($image));
-                    Storage::disk('public')->move($fileName, 'surat_permohonan_klinik/' . $fileName);
-                    $surat_permohonan_klinik = $destPath . $fileName;
-                }
-            }
-
-            // Create Consignment Request
-            $consignmentRequest = ConsignmentRequest::create([
-                'id_request' => $request->requestId,
-                'partner_id' => $partnerId,
-                'status_id' => 5,
-                'description' => $request->description,
-                'type' => $request->type,
-                'path_surat_permohonan_klinik' => $surat_permohonan_klinik ?? null
-            ]);
-
-            foreach($items as $item){
-                $consignmentRequest->items()->attach($item->itemId, ['quantity' => $item->quantity, 'quantity_send' => $item->qty_send, 'sender_id' => $request->sender_id, 'sender_pic' => $request->sender_pic, 'request_date' => $request->request_date == '' ? null : $request->request_date, 'deliver_date' => $request->deliver_date == '' ? null : $request->deliver_date]);
-            }
-
-            DB::commit();
-        } catch(\Exception $e){
-            DB::rollBack();
-            LogError::insertLogError($e->getMessage());
-
-            $error = 'Gagal menambahkan permintaan baru, tolong coba lagi!';
-
-            return redirect()->route('sell.permintaan.index', ['type' => $request->type])->with('error', $error);
-        }
-
-        $success = 'Berhasil menambahkan permintaan baru!';
-
-        return redirect()->route('sell.permintaan.index', ['type' => $request->type])->with('success', $success);
     }
 
     public function changeStatus(SellOrder $sell, $status, Request $request)
@@ -1217,47 +1036,6 @@ class SellOrderController extends Controller
         else{
             return redirect()->route('sell.index', ['type' => 'Retur'])->with('success', $success);
         }
-    }
-
-    public function cancelPermintaan(ConsignmentRequest $consignmentRequest, Request $request){
-        DB::beginTransaction();
-
-        try{
-            $consignmentRequest->status_id = 3;
-            $consignmentRequest->id_request = '-';
-
-            if(isset($request->picCancel) && isset($request->alasan)){
-                $consignmentRequest->pic_cancel = $request->picCancel;
-                $consignmentRequest->alasan_cancel = $request->alasan;
-
-                if($request->file('buktiCancel')){
-                    if($image = $request->file('buktiCancel')){
-                        $destPath = 'bukti_cancel_permintaan/';
-                        $fileName = date('YmdHis') . '-Bukti-Cancel-Permintaan.' . $image->getClientOriginalExtension();
-                        Storage::disk('public')->put($fileName, file_get_contents($image));
-                        Storage::disk('public')->move($fileName, 'bukti_cancel_permintaan/' . $fileName);
-                        $path_cancel = $destPath . $fileName;
-                    }
-    
-                    $consignmentRequest->path_cancel = $path_cancel;
-                }
-            }
-
-            $consignmentRequest->update();
-
-            DB::commit();
-        } catch(\Exception $e){
-            DB::rollBack();
-            LogError::insertLogError($e->getMessage());
-
-            $error = 'Gagal mengganti membatalkan permintaan, tolong coba lagi!';
-
-            return redirect()->route('sell.permintaan.index', ['type' => $consignmentRequest->type])->with('error', $error);
-        }
-
-        $success = 'Berhasil mengganti status permintaan!';
-
-        return redirect()->route('sell.permintaan.index', ['type' => $consignmentRequest->type])->with('success', $success);
     }
 
     function convertToGreekNumber($number)
@@ -1608,28 +1386,6 @@ class SellOrderController extends Controller
         }
     }
 
-    public function exportExcelPermintaan(ConsignmentRequest $consignmentRequest, $type){
-        return Excel::download(new ConsignmentRequestExport($consignmentRequest), 'Permintaan ' . $type . ' ' . $consignmentRequest->partner->name . ' ke-' . str_replace('/', '_', $consignmentRequest->id_request)  . '.xlsx');
-    }
-
-    public function exportPDFPermintaan(ConsignmentRequest $consignmentRequest, $type)
-    {
-        $pdf = new Mpdf([
-            'margin_top' => 10,
-            'margin_bottom' => 20,
-            'margin_left' => 18,
-            'margin_right' => 18
-        ]);
-        
-        $typeExport = 'pdf';
-        
-        $pdf->AddPage('L');
-        $pdf->SetTitle('Permintaan ' . $type . ' ' . $consignmentRequest->partner->name . ' ke-' . $consignmentRequest->id_request . '.pdf');
-        $pdf->WriteHTML(view('sell.permintaan.export', compact('consignmentRequest', 'typeExport')));
-
-        return $pdf->Output('Permintaan ' . $type . ' ' . $consignmentRequest->partner->name . ' ke-' . $consignmentRequest->id_request . '.pdf', 'I');
-    }
-
     public function exportSisaStock(Request $request){
         $partnerId = $request->partnerIdPrint;
         $type = $request->jenisExport;
@@ -1710,7 +1466,7 @@ class SellOrderController extends Controller
         else $endDate = $endDate->format('Y-m-d');
         
         $type = $request->type;
-        $typeName = $isSellOrder ? (in_array($type, ['Reguler', 'Konsinyasi']) ? '-Pengiriman' : ''): '-Permintaan';
+        $typeName = $isSellOrder ? (in_array($type, ['Reguler', 'Konsinyasi']) ? '-Penjualan' : ''): '-Permintaan';
 
         $fileName = 'Export-List'. $typeName . '-'.$type;
 
@@ -1809,81 +1565,6 @@ class SellOrderController extends Controller
         else{
             return Excel::download(new ListSisaSOCSVExport($partnerItems, $partner), 'List Sisa SO ' . $partner->clinic_id . ' - ' . $partner->name . '.csv', \Maatwebsite\Excel\Excel::CSV);
         }
-    }
-
-    public function editPermintaan(ConsignmentRequest $consignmentRequest, $type)
-    {
-        $inputedItemsPre = collect();
-        $consignmentRequestAdditionalData = null;
-
-        foreach($consignmentRequest->items as $idx => $item){
-            $inputedItemsPre->add(collect([
-                'itemId' => $item->id,
-                'sku' => $item->sku,
-                'nameModified' => $item->name . ' (' . $item->content . ') (' . $item->packaging . ') (' . $item->manufacturer . ') .',
-                'quantity' => $item->pivot->quantity,
-                'qty_send' => $item->pivot->quantity_send
-            ]));
-
-            if($idx == 0){
-                $consignmentRequestAdditionalData = [
-                    'sender_id' => $item->pivot->sender_id ?? null,
-                    'sender_pic' => $item->pivot->sender_pic ?? null,
-                    'request_date' => $item->pivot->request_date ?? null,
-                    'deliver_date' => $item->pivot->deliver_date ?? null
-                ];
-            }
-        }
-
-        $route = 'sell.permintaan.edit';
-        $routeSearch = 'item.stock.index';
-
-        return view('sell.permintaan.edit', compact('consignmentRequest', 'route', 'routeSearch', 'inputedItemsPre', 'type', 'consignmentRequestAdditionalData'));
-    }
-
-    public function updatePermintaan(ConsignmentRequest $consignmentRequest, Request $request){
-        $items = json_decode($request->items);
-
-        DB::beginTransaction();
-        try{
-            if($request->file('path_surat_permohonan_klinik')){
-                if($image = $request->file('path_surat_permohonan_klinik')){
-                    $destPath = 'surat_permohonan_klinik/';
-                    $fileName = date('YmdHis') . '-Surat-Permohonan-Klinik.' . $image->getClientOriginalExtension();
-                    Storage::disk('public')->put($fileName, file_get_contents($image));
-                    Storage::disk('public')->move($fileName, 'surat_permohonan_klinik/' . $fileName);
-                    $surat_permohonan_klinik = $destPath . $fileName;
-                }
-
-                $consignmentRequest->path_surat_permohonan_klinik = $surat_permohonan_klinik;
-            }
-
-            $consignmentRequest->items()->detach();
-
-            foreach($items as $item){
-                $consignmentRequest->items()->attach($item->itemId, ['quantity' => $item->quantity, 'quantity_send' => $item->qty_send, 'sender_id' => $request->sender_id, 'sender_pic' => $request->sender_pic, 'request_date' => $request->request_date == '' ? null : $request->request_date, 'deliver_date' => $request->deliver_date == '' ? null : $request->deliver_date]);
-            }
-
-            $consignmentRequest->id_request = $request->requestId;
-            $consignmentRequest->description = $request->description;
-
-            $consignmentRequest->status_id = 1;
-
-            $consignmentRequest->save();
-
-            DB::commit();
-        } catch(\Exception $e){
-            DB::rollBack();
-            LogError::insertLogError($e->getMessage());
-
-            $error = 'Gagal mengubah permintaan, tolong coba lagi!';
-
-            return redirect()->route('sell.permintaan.index', ['type' => $consignmentRequest->type])->with('error', $error);
-        }
-
-        $success = 'Berhasil mengubah permintaan!';
-
-        return redirect()->route('sell.permintaan.index', ['type' => $consignmentRequest->type])->with('success', $success);
     }
 
     public function terimaPesanan(SellOrder $sell, Request $request){

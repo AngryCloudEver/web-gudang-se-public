@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Edit SP PBF')
+@section('title', 'Edit Pembelian')
 
 @section('content_header')
     <div class="content_header">
-        <h1>Edit SP PBF {{ $buy->SP_no }}</h1>
+        <h1>Edit Pembelian {{ $buy->SP_no }}</h1>
     </div>
 @endsection
 
@@ -81,7 +81,7 @@
                     <div class="col-sm-4">
                         <div class="form-group">
                             <label for="listPembelian" class="btn btn-success mb-3">
-                                <span class="fas fa-plus mr-2"></span>Import List SP PBF
+                                <span class="fas fa-plus mr-2"></span>Import List Pembelian
                             </label>
                             <input type="file" name="listPembelian" id="listPembelian" hidden>
                         </div>
@@ -585,7 +585,7 @@
                 if(alert){
                     swal.fire(
                         'Gagal!',
-                        'Faktur sedang digunakan dalam list SP PBF, pastikan tidak ada yang menggunakan faktur ini sebelum menghapus!',
+                        'Faktur sedang digunakan dalam list Pembelian, pastikan tidak ada yang menggunakan faktur ini sebelum menghapus!',
                         'error'
                     );
                 }else{

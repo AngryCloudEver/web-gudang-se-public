@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('plugins.Chartjs', true)
+
 @section('title', 'Dashboard')
 
 @section('content_header')
@@ -1600,22 +1602,22 @@
                 })
             }
 
-            initAssetGudangDT()
-            initMasterSKUListDT()
-            initPenjualanDT()
-            initListPermintaanDT()
-            initListPengirimanDT()
-            initPenjualanKlinikDT()
-            initPermintaanKlinikDT()
-            initPengirimanKlinikDT()
-            initPenjualanKlinikDocDT()
-            initSPDT()
-            initSODT()
-            initMitraDT()
-            initObatTerlarisDT()
-            initSOKlinikDT()
-            initSupplierDT()
-            initSOScheduleDT()
+            // initAssetGudangDT()
+            // initMasterSKUListDT()
+            // initPenjualanDT()
+            // initListPermintaanDT()
+            // initListPengirimanDT()
+            // initPenjualanKlinikDT()
+            // initPermintaanKlinikDT()
+            // initPengirimanKlinikDT()
+            // initPenjualanKlinikDocDT()
+            // initSPDT()
+            // initSODT()
+            // initMitraDT()
+            // initObatTerlarisDT()
+            // initSOKlinikDT()
+            // initSupplierDT()
+            // initSOScheduleDT()
 
             $('#assetGudang').on('change', function() {
                 supplierAssetGudang = $(this).val()

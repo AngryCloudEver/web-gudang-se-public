@@ -164,12 +164,12 @@
                 else{
                     swal.fire({
                         title: 'Apakah anda yakin?',
-                        text: "Stock pusat akan bertambah setelah anda menyelesaikan SP PBF ini!",
+                        text: "Stock pusat akan bertambah setelah anda menyelesaikan Pembelian ini!",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#218838',
                         cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Selesaikan SP PBF',
+                        confirmButtonText: 'Selesaikan Pembelian',
                         reverseButtons: true
                         }).then((result) => {
                         if (result.isConfirmed) {

@@ -11,9 +11,7 @@
                     <th>ID Retur</th>
                 @endif
 
-                @if($type == 'Konsinyasi' || $type == 'Reguler')
-                    <th>ID Permintaan</th>
-                @elseif($type != 'SO')
+                @if($type == 'Transfer' || $type == 'Retur')
                     <th>Klinik Sumber</th>
                 @endif
 
@@ -60,7 +58,9 @@
             <tr>
                 <th></th>
                 <th></th>
+                @if($type != 'Reguler' && $type != 'Konsinyasi')
                 <th></th>
+                @endif
                 <th></th>
                 @if($type == 'Konsinyasi')
                 <th></th>

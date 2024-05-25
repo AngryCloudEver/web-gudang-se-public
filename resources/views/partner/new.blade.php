@@ -16,8 +16,8 @@
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <label for="clinic_id">ID Klinik</label>
-                            <input type="text" class="form-control" id="clinic_id" name="clinic_id" placeholder="Masukkan ID klinik..." value="{{ old('clinic_id') }}">
+                            <label for="clinic_id">ID Mitra</label>
+                            <input type="text" class="form-control" id="clinic_id" name="clinic_id" placeholder="Masukkan ID Mitra..." value="{{ old('clinic_id') }}">
                             @if($errors->first('clinic_id'))
                                 <p class="text-danger">
                                     {{ $errors->first('clinic_id') }}

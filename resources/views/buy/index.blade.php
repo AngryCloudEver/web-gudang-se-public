@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'List SP PBF')
+@section('title', 'List Pembelian')
 
 @section('content_header')
     @isset($error)
@@ -18,11 +18,11 @@
         </div>
     @endisset
     <div class="content_header">
-        <h1>List SP PBF</h1>
+        <h1>List Pembelian</h1>
         
         <div>
             <button class="btn btn-success mb-3 mr-2" id="exportDetail">
-                <span class="fas fa-print mr-2"></span>Export Detail List SP PBF
+                <span class="fas fa-print mr-2"></span>Export Detail List Pembelian
             </button>
             <a href="{{ route('buy.create') }}" class="btn btn-primary mb-3">
                 <span class="fas fa-plus mr-2"></span>Tambah Order
@@ -125,6 +125,10 @@
             position: absolute;
             top: 50%;
             width: 0;
+        }
+
+        #buy-list.table.table-bordered.table-hover.dataTable{
+            margin: 0;
         }
     </style>
 @endsection

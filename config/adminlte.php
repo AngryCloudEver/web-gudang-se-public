@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'Mediklik WMS',
+    'title' => 'Blueshift',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -30,7 +30,7 @@ return [
     |
     */
 
-    'use_ico_only' => false,
+    'use_ico_only' => true,
     'use_full_favicon' => false,
 
     /*
@@ -63,12 +63,12 @@ return [
     |
     */
 
-    'logo' => 'Mediklik WMS',
-    'logo_img' => 'logo.png',
+    'logo' => '<b>Blueshift WMS</b>',
+    'logo_img' => 'images/logo/Blueshift B.png',
     'logo_img_class' => 'brand-image',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
-    'logo_img_alt' => 'Mediklik WMS',
+    'logo_img_alt' => 'Blushift',
 
     /*
     |--------------------------------------------------------------------------
@@ -86,8 +86,8 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
-            'alt' => 'Auth Logo',
+            'path' => 'images/logo/Blueshift B.png',
+            'alt' => 'Blueshift Logo',
             'class' => '',
             'width' => 50,
             'height' => 50,
@@ -109,11 +109,11 @@ return [
     'preloader' => [
         'enabled' => true,
         'img' => [
-            'path' => 'icon.png',
-            'alt' => 'Mediklik WMS',
+            'path' => 'images/logo/icon.png',
+            'alt' => 'Blueshift WMS',
             'effect' => 'animation__shake',
             'width' => 480,
-            'height' => 480,
+            'height' => 140,
         ],
     ],
 
@@ -290,13 +290,6 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
-        [
-            'type'         => 'navbar-search',
-            'text'         => 'search',
-            'topnav_right' => true,
-        ],
-
         // Sidebar items:
         [
             'text' => 'Dashboard',
@@ -309,7 +302,7 @@ return [
             'can' => 'view-list-item',
             'submenu' => [
                 [
-                    'text' => 'Master SKU',
+                    'text' => 'Master Item',
                     'icon' => 'fas fa-fw fa-caret-right',
                     'url'  => 'admin/item',
                     'can'  => 'view-master-item'
@@ -328,14 +321,14 @@ return [
                 ],
             ],
         ],
+        // [
+        //     'text' => 'List Stock Sales',
+        //     'icon' => 'fas fa-fw fa-flask',
+        //     'can'  => 'view-stock-sales',
+        //     'url'  => 'admin/item/stock/view/sales'
+        // ],
         [
-            'text' => 'List Stock Sales',
-            'icon' => 'fas fa-fw fa-flask',
-            'can'  => 'view-stock-sales',
-            'url'  => 'admin/item/stock/view/sales'
-        ],
-        [
-            'text' => 'SP PBF',
+            'text' => 'Pembelian',
             'icon' => 'fas fa-fw fa-shopping-cart',
             'url'  => 'admin/buy',
             'can'  => 'view-buy-order'
@@ -348,37 +341,15 @@ return [
                 [
                     'text' => 'Reguler',   
                     'icon' => 'fas fa-fw fa-caret-right',
-                    'submenu' => [
-                        [
-                            'text' => 'List Permintaan',
-                            'icon' => 'fas fa-fw fa-square-caret-right',
-                            'url' => 'admin/sell/permintaan/Reguler'
-                        ],
-                        [
-                            'text' => 'List Pengiriman',
-                            'icon' => 'fas fa-fw fa-square-caret-right',
-                            'url' => 'admin/sell/view/Reguler'
-                        ]
-                    ]
+                    'url' => 'admin/sell/view/Reguler'
                 ],
                 [
                     'text' => 'Konsinyasi',   
                     'icon' => 'fas fa-fw fa-caret-right',
-                    'submenu' => [
-                        [
-                            'text' => 'List Permintaan',   
-                            'icon' => 'fas fa-fw fa-square-caret-right',
-                            'url' => 'admin/sell/permintaan/Konsinyasi'
-                        ],
-                        [
-                            'text' => 'List Pengiriman',   
-                            'icon' => 'fas fa-fw fa-square-caret-right',
-                            'url' => 'admin/sell/view/Konsinyasi',
-                        ],
-                    ]
+                    'url' => 'admin/sell/view/Konsinyasi'
                 ],
                 [
-                    'text' => 'SO',   
+                    'text' => 'Stock Opname',   
                     'icon' => 'fas fa-fw fa-caret-right',
                     'url' => 'admin/sell/view/SO'
                 ],
@@ -447,23 +418,23 @@ return [
                 ]
             ]
         ],
-        [
-            'text'    => 'Others',
-            'icon'    => 'fas fa-fw fa-database',
-            'can' => 'view-convert',
-            'submenu' => [
-                [
-                    'text' => 'Supplier Price',
-                    'icon' => 'fas fa-fw fa-caret-right',
-                    'url'  => 'admin/others/price'
-                ],
-                [
-                    'text' => 'Supplier Stock',
-                    'icon' => 'fas fa-fw fa-caret-right',
-                    'url'  => 'admin/others/stock'
-                ]
-            ]
-        ]
+        // [
+        //     'text'    => 'Others',
+        //     'icon'    => 'fas fa-fw fa-database',
+        //     'can' => 'view-convert',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Supplier Price',
+        //             'icon' => 'fas fa-fw fa-caret-right',
+        //             'url'  => 'admin/others/price'
+        //         ],
+        //         [
+        //             'text' => 'Supplier Stock',
+        //             'icon' => 'fas fa-fw fa-caret-right',
+        //             'url'  => 'admin/others/stock'
+        //         ]
+        //     ]
+        // ]
         // [
         //     'text'        => 'pages',
         //     'url'         => 'admin/pages',
@@ -571,7 +542,7 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -602,6 +573,16 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                ],
+            ],
+        ],
+        'BsCustomFileInput' => [
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'vendor/bs-custom-file-input/bs-custom-file-input.min.js',
                 ],
             ],
         ],

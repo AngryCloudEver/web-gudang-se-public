@@ -12,6 +12,8 @@
 @section('title', 'Detail Stock Opname')
 @endif
 
+@section('plugins.BsCustomFileInput', true)
+
 @section('content_header')
     @isset($error)
         <div class="alert alert-danger alert-dismissible">
@@ -147,10 +149,6 @@
                     <td>: {{ $sell->document_number }}</td>
                 </tr>
                 <tr>
-                    <th>ID Permintaan</th>
-                    <td>: {{ $sell->id_request ?? '-' }}</td>
-                </tr>
-                <tr>
                     <th>Tanggal Pengiriman</th>
                     <td>: {{ $sell->delivered_at }}</td>
                 </tr>
@@ -212,10 +210,7 @@
                     @if($sell->sell_order_type_id != 4)
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="surat_jalan_result">Upload Hasil Surat Jalan</label>
-                                <input type="file" name="surat_jalan_result" id="surat_jalan_result" class="form-control">
-                            </div>
+                            <x-adminlte-input-file name="surat_jalan_result" id="surat_jalan_result" placeholder="Choose a file..." label="Upload Hasil Surat Jalan" required/>
                         </div>
                     </div>
                     @endif
@@ -226,7 +221,7 @@
                             <span class="fas fa-file-pdf mr-2"></span>Hasil Bukti Retur
                         </a>
                     </div>
-                @else
+                @elseif($sell->sellOrderType->name == 'Retur')
                     <div class="row">
                         <div class="col-md-12">
                             <p class="text-danger fw-bolder">Hasil bukti retur belum diupload, harap upload terlebih dahulu di menu edit!</p>
