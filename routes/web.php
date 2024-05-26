@@ -35,21 +35,9 @@ Route::middleware(['auth', 'role:Superadmin'])->prefix('admin')->group(function 
         Route::prefix('dashboard')->group(function() {
           Route::get('/', [DashboardController::class, 'newIndex'])->name('dashboard');
           Route::get('/assetGudang', [DashboardController::class, 'assetGudang'])->name('dashboard.asset-gudang');
-          Route::get('/masterSKUList', [DashboardController::class, 'masterSKUList'])->name('dashboard.master-sku-list');
           Route::get('/penjualan', [DashboardController::class, 'penjualan'])->name('dashboard.penjualan');
-          Route::get('/sp', [DashboardController::class, 'sp'])->name('dashboard.sp');
-          Route::get('/listPermintaan', [DashboardController::class, 'listPermintaan'])->name('dashboard.list-permintaan');
-          Route::get('/listPengiriman', [DashboardController::class, 'listPengiriman'])->name('dashboard.list-pengiriman');
-          Route::get('/so', [DashboardController::class, 'so'])->name('dashboard.so');
-          Route::get('/listPermintaanKlinik', [DashboardController::class, 'listPermintaanKlinik'])->name('dashboard.permintaan-klinik');
-          Route::get('/listPengirimanKlinik', [DashboardController::class, 'listPengirimanKlinik'])->name('dashboard.pengiriman-klinik');
-          Route::get('/listPenjualanKlinik', [DashboardController::class, 'listPenjualanKlinik'])->name('dashboard.penjualan-klinik');
-          Route::get('/listPenjualanKlinikDoc', [DashboardController::class, 'listPenjualanKlinikDoc'])->name('dashboard.penjualan-klinik-doc');
-          Route::get('/listMitra', [DashboardController::class, 'listMitra'])->name('dashboard.mitra-list');
-          Route::get('/listSOKlinik', [DashboardController::class, 'listSOKlinik'])->name('dashboard.so-klinik');
-          Route::get('/obatTerlaris', [DashboardController::class, 'obatTerlaris'])->name('dashboard.obat-terlaris');
-          Route::get('/listSupplier', [DashboardController::class, 'listSupplier'])->name('dashboard.supplier-list');
-          Route::get('/listSOKlinikSchedule', [DashboardController::class, 'listSOKlinikSchedule'])->name('dashboard.so-klinik-schedule');
+          Route::get('/penjualanPembelian', [DashboardController::class, 'penjualanPembelian'])->name('dashboard.penjualan-pembelian');
+          
         });
   		
         Route::prefix('item')->group(function() {

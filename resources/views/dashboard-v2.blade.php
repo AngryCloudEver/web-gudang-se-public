@@ -31,6 +31,18 @@
         <input type="hidden" id="itemSoldCount" value="{{ $itemSoldCount }}">
         <input type="hidden" id="sellListCount" value="{{ $sellListCount }}">
         <input type="hidden" id="scheduleSOCount" value="{{ $scheduleSOCount }}">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h4>Penjualan</h4>
+                <canvas id="penjualan-list-chart"></canvas>               
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h4>Pembelian/Penjualan</h4>
+                <canvas id="penjualan-pembelian-list-chart"></canvas>               
+            </div>
+        </div>
         <form action="{{ route('dashboard') }}" id="theForm">
             <div class="row">
                 <div class="col-md-2">
@@ -51,78 +63,10 @@
         <div class="row mb-4">
             <div class="col-md-4">
                 <h4>Asset Gudang</h4>
-                <select id="assetGudang">
-                    <option value="ALL" selected>ALL</option>
-                </select>
-                <div>
-                    <table class="table table-bordered table-hover" id="asset-gudang-list">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Jenis</th>
-                                <th>Jumlah Obat</th>
-                                <th>Total Aset</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                        <tfoot>
-                            <th colspan="2"></th>
-                            <th></th>
-                            <th></th>
-                        </tfoot>
-                    </table>
-                </div>                
-            </div>
-            <div class="col-md-4">
-                <h4>Master SKU</h4>
-                <div>
-                    <table class="table table-bordered table-hover" id="master-sku-list">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Supplier</th>
-                                <th>Jumlah SKU</th>
-                                <th>SKU Tersedia</th>
-                                <th>Jumlah Obat</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                        <tfoot>
-                            <th colspan="2"></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                        </tfoot>
-                    </table>
-                </div>                
-            </div>
-            <div class="col-md-4">
-                <h4>Penjualan</h4>
-                <select id="penjualan">
-                    <option value="Supplier" selected>SUPPLIER</option>
-                    <option value="Layanan">LAYANAN</option>
-                </select>
-                <div>
-                    <table class="table table-bordered table-hover" id="penjualan-list">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Jenis</th>
-                                <th>Jumlah Obat</th>
-                                <th>Total Harga</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                        <tfoot>
-                            <th colspan="2"></th>
-                            <th></th>
-                            <th></th>
-                        </tfoot>
-                    </table>
-                </div>                
+                <canvas id="asset-gudang-chart"></canvas>           
             </div>
         </div>
-        <div class="row mb-4"> 
+        {{-- <div class="row mb-4"> 
             <div class="col-md-4">
                 <h4>List Permintaan</h4>
                 <div>
@@ -450,7 +394,7 @@
                     </table>
                 </div>                
             </div>
-        </div>
+        </div> --}}
 @endsection
 
 @section('extra-css')
@@ -504,1224 +448,175 @@
 
 @section('extra-js')
     <script type="text/javascript">
-
-        $(document).ready(function() {
+        $(document).ready(async function() {
             let filterStart = '{{ $filterStart == '' ? 'ALL' : $filterStart }}'
             let filterEnd = '{{ $filterEnd == '' ? 'ALL' : $filterEnd }}'
-            let suppliersCount = $('#suppliersCount').val()
-            let zonesCount = $('#zonesCount').val()
-            let partnersCount = $('#partnersCount').val()
-            let itemSoldCount = $('#itemSoldCount').val()
-            let sellListCount = $('#sellListCount').val()
-            let scheduleSOCount = $('#scheduleSOCount').val()
-            
-            let supplierAssetGudang = $('#assetGudang').val()
-            let typePenjualan = $('#penjualan').val()
-            let typeSP = $('#sp').val()
-            let typePermintaanKlinik = $('#permintaan-klinik').val()
-            let typePengirimanKlinik = $('#pengiriman-klinik').val()
-            let typePenjualanKlinik = $('#penjualan-klinik').val()
-            let typePenjualanKlinikDoc = $('#penjualan-klinik-doc').val()
-            let typeObatTerlaris = $('#obat-terlaris').val()
 
-            function initAssetGudangDT(){
-                tableAssetGudang = $('#asset-gudang-list').DataTable({
-                    "scrollX": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.asset-gudang') }}",
-                        "type": "GET",
-                        "data": {
-                            "supplier": supplierAssetGudang,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "jenis",
-                            "name": "jenis",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 2
-                        },
-                        {
-                            "data": "total_aset",
-                            "name": "total_aset",
-                            "targets": 3
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < 2){
-                            $(row).find('td').first().text((tableAssetGudang.page() * tableAssetGudang.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].jenis);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_obat);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].total_aset);
-                    },
-                })
-            }
+            let dynamicColors = function(partlyInvisible = false) {
+                var r = Math.floor(Math.random() * 255);
+                var g = Math.floor(Math.random() * 255);
+                var b = Math.floor(Math.random() * 255);
 
-            function initMasterSKUListDT(){
-                tableMasterSKUList = $('#master-sku-list').DataTable({
-                    "scrollX": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.master-sku-list') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_supplier",
-                            "name": "nama_supplier",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_sku",
-                            "name": "jumlah_sku",
-                            "targets": 2
-                        },
-                        {
-                            "data": "sku_tersedia",
-                            "name": "sku_tersedia",
-                            "targets": 3
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < suppliersCount){
-                            $(row).find('td').first().text((tableMasterSKUList.page() * tableMasterSKUList.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_supplier);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_sku);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].sku_tersedia);
-                    },
-                })
-            }
-
-            function initPenjualanDT(){
-                tablePenjualan = $('#penjualan-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.penjualan') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typePenjualan,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "jenis",
-                            "name": "jenis",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 2
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 3
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(typePenjualan == 'Layanan'){
-                            length = 2
-                        }
-                        else{
-                            length = suppliersCount
-                        }
-
-                        if(dataIndex < length){
-                            $(row).find('td').first().text((tablePenjualan.page() * tablePenjualan.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].jenis);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initPenjualanKlinikDT(){
-                tablePenjualanKlinik = $('#penjualan-klinik-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.penjualan-klinik') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typePenjualanKlinik,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_klinik",
-                            "name": "nama_klinik",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 2
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 3
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < partnersCount){
-                            $(row).find('td').first().text((tablePenjualanKlinik.page() * tablePenjualanKlinik.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_klinik);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initListPermintaanDT(){
-                tableListPermintaan = $('#list-permintaan').DataTable({
-                    "scrollX": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.list-permintaan') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "jenis",
-                            "name": "jenis",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_permintaan",
-                            "name": "jumlah_permintaan",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < 2){
-                            $(row).find('td').first().text((tableListPermintaan.page() * tableListPermintaan.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].jenis);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_permintaan);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initListPengirimanDT(){
-                tableListPengiriman = $('#list-pengiriman').DataTable({
-                    "scrollX": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.list-pengiriman') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "jenis",
-                            "name": "jenis",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_pengiriman",
-                            "name": "jumlah_pengiriman",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < 2){
-                            $(row).find('td').first().text((tableListPengiriman.page() * tableListPengiriman.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].jenis);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_pengiriman);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initPenjualanKlinikDocDT(){
-                tablePenjualanKlinikDoc = $('#penjualan-klinik-doc-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.penjualan-klinik-doc') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typePenjualanKlinikDoc,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "no_doc",
-                            "name": "no_doc",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 2
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 3
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < sellListCount){
-                            $(row).find('td').first().text((tablePenjualanKlinikDoc.page() * tablePenjualanKlinikDoc.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        if(data.length != 0){
-                            $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                            $(tfoot).children('th:nth-child(2)').text(data[end-1].no_doc);
-                            $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_obat);
-                        }
-                    },
-                })
-            }
-
-            function initPermintaanKlinikDT(){
-                tablePermintaanKlinik = $('#permintaan-klinik-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.permintaan-klinik') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typePermintaanKlinik,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_klinik",
-                            "name": "nama_klinik",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_permintaan",
-                            "name": "jumlah_permintaan",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < partnersCount){
-                            $(row).find('td').first().text((tablePermintaanKlinik.page() * tablePermintaanKlinik.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_klinik);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_permintaan);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initPengirimanKlinikDT(){
-                tablePengirimanKlinik = $('#pengiriman-klinik-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.pengiriman-klinik') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typePengirimanKlinik,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_klinik",
-                            "name": "nama_klinik",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_pengiriman",
-                            "name": "jumlah_pengiriman",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < partnersCount){
-                            $(row).find('td').first().text((tablePengirimanKlinik.page() * tablePengirimanKlinik.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_klinik);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_pengiriman);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initSPDT(){
-                tableSP = $('#sp-list').DataTable({
-                    "scrollX": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.sp') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typeSP,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_supplier",
-                            "name": "nama_supplier",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_sp",
-                            "name": "jumlah_sp",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < suppliersCount){
-                            $(row).find('td').first().text((tableSP.page() * tableSP.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_supplier);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_sp);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-            
-            function initSODT(){
-                tableSO = $('#so-list').DataTable({
-                    "scrollX": true,
-                    "scrollCollapse": true,
-                    "scrollY": '300px',
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.so') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        },
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "wilayah",
-                            "name": "wilayah",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_so",
-                            "name": "jumlah_so",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < zonesCount){
-                            $(row).find('td').first().text((tableSO.page() * tableSO.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].wilayah);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_so);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initMitraDT(){
-                tableMitra = $('#mitra-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.mitra-list') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "wilayah",
-                            "name": "wilayah",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_mitra",
-                            "name": "jumlah_mitra",
-                            "targets": 2
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < zonesCount){
-                            $(row).find('td').first().text((tableMitra.page() * tableMitra.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].wilayah);
-                    },
-                })
-            }
-
-            function initObatTerlarisDT(){
-                tableObatTerlaris = $('#obat-terlaris-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.obat-terlaris') }}",
-                        "type": "GET",
-                        "data": {
-                            "type": typeObatTerlaris,
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_obat",
-                            "name": "nama_obat",
-                            "targets": 1
-                        },
-                        {
-                            "data": "supplier",
-                            "name": "supplier",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < itemSoldCount){
-                            $(row).find('td').first().text((tableObatTerlaris.page() * tableObatTerlaris.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        if(data.length != 0){
-                            $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                            $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_obat);
-                            $(tfoot).children('th:nth-child(3)').text(data[end-1].supplier);;
-                        }
-                    },
-                })
-            }
-
-            function initSOKlinikDT(){
-                tableSOKlinik = $('#so-klinik-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.so-klinik') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_klinik",
-                            "name": "nama_klinik",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_so",
-                            "name": "jumlah_so",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < partnersCount){
-                            $(row).find('td').first().text((tableSOKlinik.page() * tableSOKlinik.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_klinik);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_so);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].jumlah_obat);
-                    },
-                })
-            }
-
-            function initSupplierDT(){
-                tableSupplierList = $('#supplier-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.supplier-list') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_supplier",
-                            "name": "nama_supplier",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jumlah_sku",
-                            "name": "jumlah_sku",
-                            "targets": 2
-                        },
-                        {
-                            "data": "sku_tersedia",
-                            "name": "sku_tersedia",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < suppliersCount){
-                            $(row).find('td').first().text((tableSupplierList.page() * tableSupplierList.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                        $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_supplier);
-                        $(tfoot).children('th:nth-child(3)').text(data[end-1].jumlah_sku);
-                        $(tfoot).children('th:nth-child(4)').text(data[end-1].sku_tersedia);
-                    },
-                })
-            }
-
-            function initSOScheduleDT(){
-                tableSOScheduleKlinik = $('#so-klinik-schedule-list').DataTable({
-                    "scrollX": true,
-                    "scrollY": "300px",
-                    "scrollCollapse": true,
-                    "processing": true,
-                    "serverSide": true,
-                    "ajax": {
-                        "url": "{{ route('dashboard.so-klinik-schedule') }}",
-                        "type": "GET",
-                        "data": {
-                            "filterStart": filterStart,
-                            "filterEnd": filterEnd,
-                        }
-                    },
-                    "columnDefs": [
-                        {
-                            "data": "no",
-                            "name": "no",
-                            "targets": 0
-                        },
-                        {
-                            "data": "nama_klinik",
-                            "name": "nama_klinik",
-                            "targets": 1
-                        },
-                        {
-                            "data": "jadwal_so",
-                            "name": "jadwal_so",
-                            "targets": 2
-                        },
-                        {
-                            "data": "jumlah_obat",
-                            "name": "jumlah_obat",
-                            "targets": 3
-                        },
-                        {
-                            "data": "total_harga",
-                            "name": "total_harga",
-                            "targets": 4
-                        }
-                    ],
-                    order: [],
-                    searching: false,
-                    lengthChange: false,
-                    paging: false,
-                    ordering: false,
-                    info: false,
-                    search: {
-                        smart: false,
-                        "caseInsensitive": false
-                    },
-                    "createdRow": function(row, data, dataIndex) {
-                        if(dataIndex < scheduleSOCount){
-                            $(row).find('td').first().text((tableSOScheduleKlinik.page() * tableSOScheduleKlinik.page.len()) + dataIndex + 1);
-                        }
-                        else{
-                            $(row).find('td').hide()
-                        }
-                    },
-                    "footerCallback": function (tfoot, data, start, end, display) {
-                        if(data.length != 0){
-                            $(tfoot).children('th:nth-child(1)').text(data[end-1].no);
-                            $(tfoot).children('th:nth-child(2)').text(data[end-1].nama_klinik);
-                            $(tfoot).children('th:nth-child(3)').text(data[end-1].jadwal_so);
-                        }
-                    },
-                })
-            }
-
-            // initAssetGudangDT()
-            // initMasterSKUListDT()
-            // initPenjualanDT()
-            // initListPermintaanDT()
-            // initListPengirimanDT()
-            // initPenjualanKlinikDT()
-            // initPermintaanKlinikDT()
-            // initPengirimanKlinikDT()
-            // initPenjualanKlinikDocDT()
-            // initSPDT()
-            // initSODT()
-            // initMitraDT()
-            // initObatTerlarisDT()
-            // initSOKlinikDT()
-            // initSupplierDT()
-            // initSOScheduleDT()
-
-            $('#assetGudang').on('change', function() {
-                supplierAssetGudang = $(this).val()
-
-                tableAssetGudang.destroy()
-                initAssetGudangDT()
-            });
-
-            $('#penjualan').on('change', function() {
-                typePenjualan = $(this).val()
-
-                tablePenjualan.destroy()
-                initPenjualanDT()
-            });
-
-            $('#penjualan-klinik').on('change', function() {
-                typePenjualanKlinik = $(this).val()
-
-                tablePenjualanKlinik.destroy()
-                initPenjualanKlinikDT()
-            });
-
-            $('#penjualan-klinik-doc').on('change', function() {
-                typePenjualanKlinikDoc = $(this).val()
-
-                tablePenjualanKlinikDoc.destroy()
-                initPenjualanKlinikDocDT()
-            });
-
-            $('#sp').on('change', function() {
-                typeSP = $(this).val()
-
-                tableSP.destroy()
-                initSPDT()
-            });
-            
-            $('#permintaan-klinik').on('change', function() {
-                typePermintaanKlinik = $(this).val()
-
-                tablePermintaanKlinik.destroy()
-                initPermintaanKlinikDT()
-            });
-
-            $('#pengiriman-klinik').on('change', function() {
-                typePengirimanKlinik = $(this).val()
-
-                tablePengirimanKlinik.destroy()
-                initPengirimanKlinikDT()
-            });
-
-            $('#obat-terlaris').on('change', function() {
-                typeObatTerlaris = $(this).val()
-
-                tableObatTerlaris.destroy()
-                initObatTerlarisDT()
-            });
-        });
-
-        function number_format(number) {
-            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        $('#assetGudang').select2({
-            theme: "bootstrap",
-            ajax: {
-                url: "{{ route('get-all-supplier') }}",
-                maximumSelectionLength: 1,
-                data: function (params) {
-                    return {
-                        search: params.term,
-                    }
-                },
-                processResults: function (data) {
-                    return data
+                if(partlyInvisible){
+                    return "rgb(" + r + "," + g + "," + b + ", 0.3)"
                 }
-            },
-        });
 
-        $('#penjualan').select2({theme: "bootstrap"})
+                return "rgb(" + r + "," + g + "," + b + ")";
+            };
 
-        $('#penjualan-klinik').select2({theme: "bootstrap"})
+            let assetGudangChart = $('#asset-gudang-chart')
+            let penjualanChart = $('#penjualan-list-chart')
+            let penjualanPembelianChart = $('#penjualan-pembelian-list-chart')
 
-        $('#penjualan-klinik-doc').select2({theme: "bootstrap"})
+            async function initAssetGudangDT(){
+                let datas = []
+                let labels = []
+                let colors = []
 
-        $('#sp').select2({
-            theme: "bootstrap",
-            ajax: {
-                url: "{{ route('get-all-type') }}",
-                maximumSelectionLength: 1,
-                data: function (params) {
-                    return {
-                        search: params.term,
+                await $.ajax({
+                    url: "{{ route('dashboard.asset-gudang') }}",
+                    method: "GET",
+                    data: {
+                        "filterStart": filterStart,
+                        "filterEnd": filterEnd,
+                    },
+                    success: function(response){
+                        response.forEach(x => {
+                            datas.push(x.total_aset_raw)
+                            labels.push(x.jenis + " (" + x.total_aset + ") (" + x.jumlah_obat + " Item)")
+                            colors.push(dynamicColors())
+                        })
                     }
-                },
-                processResults: function (data) {
-                    return data
-                }
-            },
-        });
+                })
 
-        $('#permintaan-klinik').select2({theme: "bootstrap"})
+                assetGudangChart = new Chart(assetGudangChart, {
+                    type: 'pie',
+                    data: {
+                        datasets: [
+                            {
+                                data: datas,
+                                backgroundColor: colors,
+                                borderDisplay: false
+                            }
+                        ],
+                        labels: labels,
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                align: 'start'
+                            }
+                        }
+                    }
+                });
+            }
 
-        $('#pengiriman-klinik').select2({theme: "bootstrap"})
+            async function initPenjualanDT(){
+                let datasTotal = []
+                let datasReguler = []
+                let datasSO = []
+                let months = []
 
-        $('#obat-terlaris').select2({theme: "bootstrap"})
+                await $.ajax({
+                    url: "{{ route('dashboard.penjualan') }}",
+                    type: "GET",
+                    success: function(response){
+                        response.forEach(x => {
+                            months.push(x.label)
+                            datasTotal.push(x.totalAmount)
+                            datasReguler.push(x.regulerAmount)
+                            datasSO.push(x.soAmount)
+                        })
+
+                        penjualanChart = new Chart(penjualanChart, {
+                            type: 'bar',  // Default type
+                            data: {
+                                labels: months,
+                                datasets: [
+                                    {
+                                        type: 'line',
+                                        label: 'Total Penjualan',
+                                        fill: false,
+                                        data: datasTotal,
+                                        borderColor: 'rgb(135,206,250)'
+                                    },
+                                    {
+                                        type: 'bar',
+                                        label: 'Penjualan Reguler',
+                                        data: datasReguler,
+                                        borderColor: dynamicColors(true),
+                                        backgroundColor: 'rgb(255,127,80, 0.5)',
+                                    },
+                                    {
+                                        type: 'bar',
+                                        label: 'Stock Opname',
+                                        data: datasSO,
+                                        borderColor: dynamicColors(true),
+                                        backgroundColor: 'rgb(139,0,139, 0.5)',
+                                    }
+                                ],
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+            }
+
+            async function initPembelianPenjualanDT(){
+                let datasPenjualan = []
+                let datasPembelian = []
+                let months = []
+
+                await $.ajax({
+                    url: "{{ route('dashboard.penjualan-pembelian') }}",
+                    type: "GET",
+                    success: function(response){
+                        response.forEach(x => {
+                            months.push(x.label)
+                            datasPenjualan.push(x.penjualanAmount)
+                            datasPembelian.push(x.pembelianAmount)
+                        })
+
+                        penjualanPembelianChart = new Chart(penjualanPembelianChart, {
+                            type: 'bar',
+                            data: {
+                                labels: months,
+                                datasets: [
+                                    {
+                                        type: 'bar',
+                                        label: 'Total Penjualan',
+                                        data: datasPenjualan,
+                                        borderColor: dynamicColors(),
+                                        backgroundColor: dynamicColors()
+                                    },
+                                    {
+                                        type: 'bar',
+                                        label: 'Total Pembelian',
+                                        data: datasPembelian,
+                                        borderColor: dynamicColors(),
+                                        backgroundColor: dynamicColors()
+                                    },
+                                ],
+                            }
+                        });
+                    }
+                })
+            }
+
+            function number_format(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            await initAssetGudangDT()
+            await initPenjualanDT()
+            await initPembelianPenjualanDT()
+        })
+
     </script>
 @endsection
