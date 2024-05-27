@@ -353,7 +353,6 @@ class DashboardController extends Controller
     }
 
     public function assetGudang(Request $request){
-        $supplier = $request->supplier;
         $filterStart = $request->filterStart;
         $filterEnd = $request->filterEnd;
 
@@ -363,11 +362,7 @@ class DashboardController extends Controller
                             ->join('items', 'partner_item.item_id', '=', 'items.id')
                             ->where('is_consigned', 0)
                             ->where('stock_qty', '>', 0)
-                            ->where(function($query) use($supplier, $filterStart, $filterEnd){
-                                if($supplier != 'ALL'){
-                                    $query->where('supplier_id', $supplier);
-                                }
-
+                            ->where(function($query) use($filterStart, $filterEnd){
                                 if($filterStart != 'ALL'){
                                     $query->where('partner_item.created_at', '>=', $filterStart);
                                 }
@@ -383,11 +378,7 @@ class DashboardController extends Controller
                             ->join('items', 'partner_item.item_id', '=', 'items.id')
                             ->where('is_consigned', 1)
                             ->where('stock_qty', '>', 0)
-                            ->where(function($query) use($supplier, $filterStart, $filterEnd){
-                                if($supplier != 'ALL'){
-                                    $query->where('supplier_id', $supplier);
-                                }
-
+                            ->where(function($query) use($filterStart, $filterEnd){
                                 if($filterStart != 'ALL'){
                                     $query->where('partner_item.created_at', '>=', $filterStart);
                                 }
@@ -399,18 +390,13 @@ class DashboardController extends Controller
                             ->first();
 
         $mitraValue = DB::table('sell_order_details as sod')
-                            ->selectRaw('SUM((total/quantity) * quantity_left) as total_value')
+                            ->selectRaw('SUM((total/quantity) * quantity) as total_value')
                             ->join('sell_orders as so', 'so.id', '=', 'sod.sell_order_id')
                             ->join('partner_item as pi2', 'pi2.id', '=', 'sod.item_id')
                             ->join('items as i', 'i.id', '=', 'pi2.item_id')
-                            ->where('quantity_left', '>', 0)
                             ->where('quantity', '<>', 0)
                             ->where('so.status_id', '<>', 3)
-                            ->where(function($query) use($supplier, $filterStart, $filterEnd){
-                                if($supplier != 'ALL'){
-                                    $query->where('i.supplier_id', $supplier);
-                                }
-
+                            ->where(function($query) use($filterStart, $filterEnd){
                                 if($filterStart != 'ALL'){
                                     $query->where('pi2.created_at', '>=', $filterStart);
                                 }
@@ -438,18 +424,17 @@ class DashboardController extends Controller
             ],
         ]);
 
-        $totalAsetSum = $assets->sum('jumlah_obat');
-        $totalValueSum = $assets->sum('total_aset_raw');
+        // $totalAsetSum = $assets->sum('jumlah_obat');
+        // $totalValueSum = $assets->sum('total_aset_raw');
 
-        $assets[] = [
-            'no' => 'Total Aset',
-            'jenis' => $totalAsetSum,
-            'jumlah_obat' => 'Rp'.number_format($totalValueSum),
-            'total_aset' => ''
-        ];
+        // $assets[] = [
+        //     'no' => 'Total Aset',
+        //     'jenis' => $totalAsetSum,
+        //     'jumlah_obat' => 'Rp'.number_format($totalValueSum),
+        //     'total_aset' => ''
+        // ];
 
-        return DataTables::of($assets)
-            ->make();
+        return response()->json($assets);
     }
 
     public function masterSKUList(Request $request){
@@ -487,7 +472,7 @@ class DashboardController extends Controller
                                 $query->where('items.created_at', '<=', $filterEnd);
                             }
                         })
-                        ->groupBy('suppliers.id')
+                        ->groupBy('suppliers.id', 'suppliers.name')
                         ->get()
                         ->transform(function ($dt) use($others){
                             $isFind = false;
@@ -558,131 +543,201 @@ class DashboardController extends Controller
     }
 
     public function penjualan(Request $request){
-        $type = $request->type;
-        $filterStart = $request->filterStart;
-        $filterEnd = $request->filterEnd;
+        $penjualanTotal = SellOrder::selectRaw("CONCAT(year(sell_orders.delivered_at), '-', MONTH(sell_orders.delivered_at)) as deliver_month, SUM(sell_order_details.total) as total")
+                                    ->join('sell_order_details', 'sell_orders.id', '=', 'sell_order_details.sell_order_id')
+                                    ->whereIn('sell_orders.sell_order_type_id', [1, 5])
+                                    ->where('sell_orders.status_id', 2)
+                                    ->whereNull('sell_orders.deleted_at')
+                                    ->groupBy('deliver_month')
+                                    ->orderBy('sell_orders.delivered_at', 'DESC')
+                                    ->limit(10)
+                                    ->get();
 
-        $query = DB::table('sell_order_types')
-                    ->select(DB::raw($type == 'Layanan' ? 'sell_order_types.name as jenis' : 'suppliers.name as jenis'), 
-                            DB::raw('SUM(quantity) as jumlah_obat'), 
-                            DB::raw('SUM(total) as total_harga'))
-                    ->join('sell_orders', 'sell_order_types.id', '=', 'sell_orders.sell_order_type_id')
-                    ->join('sell_order_details', 'sell_order_details.sell_order_id', '=', 'sell_orders.id')
-                    ->join('partner_item', 'partner_item.id', '=', 'sell_order_details.item_id')
-                    ->join('items', 'items.id', '=', 'partner_item.item_id')
-                    ->join('suppliers', 'suppliers.id', '=', 'items.supplier_id')
-                    ->where('quantity', '<>', 0)
-                    ->where('sell_orders.status_id', 2)
-                    ->whereIn('sell_order_types.id', [1, 5])
-                    ->where(function($query) use($filterStart, $filterEnd){
-                        if($filterStart != 'ALL'){
-                            $query->where('sell_order_details.created_at', '>=', $filterStart);
-                        }
+        $penjualanPerType = SellOrder::select('sell_order_types.name')
+                                    ->selectRaw("CONCAT(year(sell_orders.delivered_at), '-', MONTH(sell_orders.delivered_at)) as deliver_month, SUM(sell_order_details.total) as total")
+                                    ->join('sell_order_details', 'sell_orders.id', '=', 'sell_order_details.sell_order_id')
+                                    ->join('sell_order_types', 'sell_order_types.id', '=', 'sell_orders.sell_order_type_id')
+                                    ->whereIn('sell_orders.sell_order_type_id', [1, 5])
+                                    ->where('sell_orders.status_id', 2)
+                                    ->whereNull('sell_orders.deleted_at')
+                                    ->groupBy('deliver_month', 'sell_order_types.name')
+                                    ->orderBy('sell_orders.delivered_at', 'DESC')
+                                    ->limit(10)
+                                    ->get();
 
-                        if($filterStart != 'ALL'){
-                            $query->where('sell_order_details.created_at', '<=', $filterEnd);
-                        }
-                    });
-        
-        if ($type == 'Layanan') {
-            $query->groupBy('sell_order_types.id');
-        } else {
-            $query->groupBy('suppliers.id');
+        $total = $penjualanTotal->map(function ($penjualan, int $key){
+            return [
+                'name' => 'Total',
+                'deliver_month' => $penjualan->deliver_month,
+                'total' => $penjualan->total,
+                'year' => explode('-', $penjualan->deliver_month)[0],
+                'month' => explode('-', $penjualan->deliver_month)[1],
+            ];
+        });
+
+        $typeReguler = $penjualanPerType->filter(function ($penjualan, int $key){
+            return $penjualan->name == 'Penjualan Reguler';
+        })->map(function ($penjualan, int $key){
+            return [
+                'name' => $penjualan->name,
+                'deliver_month' => $penjualan->deliver_month,
+                'total' => $penjualan->total,
+                'year' => explode('-', $penjualan->deliver_month)[0],
+                'month' => explode('-', $penjualan->deliver_month)[1],
+            ];
+        });
+
+        $typeSO = $penjualanPerType->filter(function ($penjualan, int $key) {
+            return $penjualan->name == 'Stock Opname';
+        })->map(function ($penjualan, int $key){
+            return [
+                'name' => $penjualan->name,
+                'deliver_month' => $penjualan->deliver_month,
+                'total' => $penjualan->total,
+                'year' => explode('-', $penjualan->deliver_month)[0],
+                'month' => explode('-', $penjualan->deliver_month)[1],
+            ];
+        });
+
+        $months = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $month = Carbon::today()->startOfMonth()->subMonth($i);
+            $year = Carbon::today()->startOfMonth()->subMonth($i)->format('Y');
+            array_push($months, array(
+                'month' => (int) $month->format('m'),
+                'monthName' => $month->monthName,
+                'year' => $year
+            ));
         }
 
-        $results = $query->get();
-        
-        $assets = collect([]);
+        $results = [];
 
-        if($type == 'Layanan'){
-            $sellType = SellOrderType::whereIn('id', [1, 5])->get();
+        foreach($months as $month){
+            $totalWithSameMonthYear = $total->filter(function($dt) use ($month){
+                return $dt['month'] == $month['month'] && $dt['year'] == $month['year'];
+            })->all();
+            
+            $regulerWithSameMonthYear = $typeReguler->filter(function($dt) use ($month){
+                return $dt['month'] == $month['month'] && $dt['year'] == $month['year'];
+            })->all();
+            
+            $SOWithSameMonthYear = $typeSO->filter(function($dt) use ($month){
+                return $dt['month'] == $month['month'] && $dt['year'] == $month['year'];
+            })->all();
 
-            foreach($sellType as $idx => $type){
-                $find = false;
-
-                foreach($results as $jenis){
-                    if($type->name == $jenis->jenis){
-                        $find = true;
-
-                        if($jenis->jenis == 'Penjualan Reguler'){
-                            $jenis->jenis = 'Reguler';
-                        }
-                        else{
-                            $jenis->jenis = 'Konsinyasi';
-                        }
-
-                        $assets[] = [
-                                'no' => $idx+1,
-                                'jenis' => $jenis->jenis,
-                                'jumlah_obat' => (int) $jenis->jumlah_obat,
-                                'total_harga' => 'Rp'.number_format((int) $jenis->total_harga),
-                                'total_harga_raw' => (int) $jenis->total_harga
-                        ];
-                    }
-                }
-
-                if(!$find){
-                    if($type->name == 'Penjualan Reguler'){
-                        $type->name = 'Reguler';
-                    }
-                    else{
-                        $type->name = 'Konsinyasi';
-                    }
-
-                    $assets[] = [
-                        'no' => $idx+1,
-                        'jenis' => $type->name,
-                        'jumlah_obat' => 0,
-                        'total_harga' => 0,
-                        'total_harga_raw' => 0
-                    ];
+            if(count($totalWithSameMonthYear) > 0){
+                foreach($totalWithSameMonthYear as $dt){
+                    $amountTotal = $dt['total'];
                 }
             }
-        }
-        else{
-            $suppliers = Supplier::all();
 
-            foreach($suppliers as $idx => $supp){
-                $find = false;
-                
-                foreach($results as $jenis){
-                    if($supp->name == $jenis->jenis){
-                        $find = true;
-
-                        $assets[] = [
-                                'no' => $idx+1,
-                                'jenis' => $jenis->jenis,
-                                'jumlah_obat' => (int) $jenis->jumlah_obat,
-                                'total_harga' => 'Rp'.number_format((int) $jenis->total_harga),
-                                'total_harga_raw' => (int) $jenis->total_harga
-                        ];
-                    }
-                }
-
-                if(!$find){
-                    $assets[] = [
-                        'no' => $idx+1,
-                        'jenis' => $supp->name,
-                        'jumlah_obat' => 0,
-                        'total_harga' => 0,
-                        'total_harga_raw' => 0
-                    ];
+            if(count($regulerWithSameMonthYear) > 0){
+                foreach($regulerWithSameMonthYear as $dt){
+                    $amountReguler = $dt['total'];
                 }
             }
+
+            if(count($SOWithSameMonthYear) > 0){
+                foreach($SOWithSameMonthYear as $dt){
+                    $amountSO = $dt['total'];
+                }
+            }
+
+            array_push($results, array(
+                'label' => $month['monthName'] . '-' . $month['year'],
+                'totalAmount' => count($totalWithSameMonthYear) > 0 ? (int) $amountTotal : 0,
+                'regulerAmount' => count($regulerWithSameMonthYear) > 0 ? (int) $amountReguler : 0,
+                'soAmount' => count($SOWithSameMonthYear) > 0 ? (int) $amountSO : 0,
+            ));
         }
 
-        $totalJumlahSum = $assets->sum('jumlah_obat');
-        $totalHargaSum = $assets->sum('total_harga_raw');
+        return response()->json($results);
+    
+    }
+    public function penjualanPembelian(Request $request){
+        $penjualanTotal = SellOrder::selectRaw("CONCAT(year(sell_orders.delivered_at), '-', MONTH(sell_orders.delivered_at)) as deliver_month, SUM(sell_order_details.total) as total")
+                                    ->join('sell_order_details', 'sell_orders.id', '=', 'sell_order_details.sell_order_id')
+                                    ->whereIn('sell_orders.sell_order_type_id', [1, 5])
+                                    ->where('sell_orders.status_id', 2)
+                                    ->whereNull('sell_orders.deleted_at')
+                                    ->groupBy('deliver_month')
+                                    ->orderBy('sell_orders.delivered_at', 'DESC')
+                                    ->limit(10)
+                                    ->get();
 
-        $assets[] = [
-            'no' => 'Total Penjualan',
-            'jenis' => $totalJumlahSum,
-            'jumlah_obat' => 'Rp'.number_format($totalHargaSum),
-            'total_harga' => ''
-        ];
+        $pembelianTotal = BuyOrder::selectRaw("CONCAT(year(buy_orders.SP_date), '-', MONTH(buy_orders.SP_date)) as 'deliver_month', SUM(buy_order_details.amount) as total")
+                                    ->join('buy_order_details', 'buy_orders.id', '=', 'buy_order_details.buy_order_id')
+                                    ->where('buy_orders.status_id', 2)
+                                    ->whereNull('buy_orders.deleted_at')
+                                    ->groupBy('deliver_month')
+                                    ->orderBy('buy_orders.SP_date', 'DESC')
+                                    ->limit(10)
+                                    ->get();
 
-        return DataTables::of($assets)
-            ->make();
+        $penjualan = $penjualanTotal->map(function ($penjualan, int $key){
+            return [
+                'name' => 'Penjualan',
+                'deliver_month' => $penjualan->deliver_month,
+                'total' => $penjualan->total,
+                'year' => explode('-', $penjualan->deliver_month)[0],
+                'month' => explode('-', $penjualan->deliver_month)[1],
+            ];
+        });
+
+        $pembelian = $pembelianTotal->map(function ($pembelian, int $key){
+            return [
+                'name' => 'Pembelian',
+                'deliver_month' => $pembelian->deliver_month,
+                'total' => $pembelian->total,
+                'year' => explode('-', $pembelian->deliver_month)[0],
+                'month' => explode('-', $pembelian->deliver_month)[1],
+            ];
+        });
+
+        $months = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $month = Carbon::today()->startOfMonth()->subMonth($i);
+            $year = Carbon::today()->startOfMonth()->subMonth($i)->format('Y');
+            array_push($months, array(
+                'month' => (int) $month->format('m'),
+                'monthName' => $month->monthName,
+                'year' => $year
+            ));
+        }
+
+        $results = [];
+
+        foreach($months as $month){
+            $penjualanWithSameMonthYear = $penjualan->filter(function($dt) use ($month){
+                return $dt['month'] == $month['month'] && $dt['year'] == $month['year'];
+            })->all();
+            
+            $pembelianWithSameMonthYear = $pembelian->filter(function($dt) use ($month){
+                return $dt['month'] == $month['month'] && $dt['year'] == $month['year'];
+            })->all();
+
+            if(count($penjualanWithSameMonthYear) > 0){
+                foreach($penjualanWithSameMonthYear as $dt){
+                    $amountPenjualan = $dt['total'];
+                }
+            }
+
+            if(count($pembelianWithSameMonthYear) > 0){
+                foreach($pembelianWithSameMonthYear as $dt){
+                    $amountPembelian = $dt['total'];
+                }
+            }
+
+            array_push($results, array(
+                'label' => $month['monthName'] . '-' . $month['year'],
+                'penjualanAmount' => count($penjualanWithSameMonthYear) > 0 ? (int) $amountPenjualan : 0,
+                'pembelianAmount' => count($pembelianWithSameMonthYear) > 0 ? (int) $amountPembelian : 0,
+            ));
+        }
+
+        return response()->json($results);
     }
 
     public function sp(Request $request){

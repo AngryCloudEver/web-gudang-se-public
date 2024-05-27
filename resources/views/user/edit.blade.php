@@ -53,11 +53,11 @@
                         <div class="mt-4">
                             <x-input-label for="role" :value="__('Role')" />
             
-                            <x-adminlte-select2 id="role" name="role">
+                            <x-adminlte-select id="role" name="role">
                                 @foreach ($roles as $role) 
                                     <option value="{{$role->id}}" @selected($role->name === $currentRole)>{!! $role->name !!}</option>
                                 @endforeach
-                            </x-adminlte-select2>
+                            </x-adminlte-select>
             
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>

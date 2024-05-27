@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @if($type == 'Reguler')
-@section('title', 'List Pengiriman Reguler')
+@section('title', 'List Penjualan Reguler')
 @elseif($type == 'Konsinyasi')
 @section('title', 'List Konsinyasi')
 @elseif($type == 'Transfer')
@@ -9,7 +9,7 @@
 @elseif($type == 'Retur')
 @section('title', 'List Retur')
 @else
-@section('title', 'List SO')
+@section('title', 'List Stock Opname')
 @endif
 
 @section('content_header')
@@ -29,26 +29,21 @@
     @endisset
     <div class="content_header">
         @if($type != 'Konsinyasi')
-            <h1>List {{ $type == 'Reguler' ? 'Pengiriman' : '' }} {{ $type }}</h1>
+            <h1>List {{ $type == 'Reguler' ? 'Penjualan' : '' }} {{ $type }}</h1>
         @else
             <h1>List Pengiriman Konsinyasi</h1>
         @endif
         <div>
             <button class="btn btn-success mb-3 mr-2" id="exportDetail">
-                <span class="fas fa-print mr-2"></span>Export Detail List {{ $type == 'Reguler' ? 'Pengiriman' : '' }} {{ $type }}
+                <span class="fas fa-print mr-2"></span>Export Detail List {{ $type == 'Reguler' ? 'Penjualan' : '' }} {{ $type }}
             </button>
-            @if($type == 'Retur')
-                <button class="btn btn-success mb-3 mr-2" id="currentStock">
-                    <span class="fas fa-print mr-2"></span>Export Current Stock
-                </button>
-            @endif
             @if($type == 'Reguler' || $type == 'Konsinyasi')
                 <a href="{{ route('sell.create', ['type' => $type]) }}" class="btn btn-primary mb-3">
-                    <span class="fas fa-plus mr-2"></span>Tambah {{ $type == 'Reguler' ? 'Pengiriman' : '' }} {{ $type }}
+                    <span class="fas fa-plus mr-2"></span>Tambah {{ $type == 'Reguler' ? 'Penjualan' : '' }} {{ $type }}
                 </a>
             @elseif($type != 'SO')
                 <a href="#" class="btn btn-primary mb-3" id="pilihMitraAsal">
-                    <span class="fas fa-plus mr-2"></span>Tambah {{ $type == 'Reguler' ? 'Pengiriman' : '' }} {{ $type }}
+                    <span class="fas fa-plus mr-2"></span>Tambah {{ $type == 'Reguler' ? 'Penjualan' : '' }} {{ $type }}
                 </a>
             @else
                 <button class="btn btn-success mb-3 mr-2" id="sisaStock">
@@ -243,7 +238,7 @@
             @csrf
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="partnerSourceId">Pilih Klinik Sumber</label>
+                        <label for="partnerSourceId">Pilih Mitra Sumber</label>
                         <div style="width: 100%" id="partnerIdContainer">
                             <select class="form-control" id="partnerSourceId" name="partnerSourceId">
                             </select>
@@ -389,6 +384,10 @@
 
         #partnerIdController .select2-container{
             width: 100% !important;
+        }
+
+        #sell-list.table.table-bordered.table-hover.dataTable{
+            margin: 0;
         }
     </style>
 @endsection
@@ -961,14 +960,9 @@
                         "targets": 1
                     },
                     {
-                        "data": "id_request",
-                        "name": "id_request",
-                        "targets": 2
-                    },
-                    {
                         "data": "destination_partner_id",
                         "name": "destination_partner_id",
-                        "targets": 3
+                        "targets": 2
                     },
                     {
                         "data": "created_at",
@@ -976,12 +970,12 @@
                         "render": function(data, type, row, meta) {
                             return row.created_at.display
                         },
-                        "targets": 4,
+                        "targets": 3,
                     },
                     {
                         "data": "total_price",
                         "name": "total_price",
-                        "targets": 5,
+                        "targets": 4,
                     },
                     {
                         "data": "delivered_at",
@@ -989,21 +983,21 @@
                         "render": function(data, type, row, meta) {
                             return row.delivered_at.display
                         },
-                        "targets": 6,
+                        "targets": 5,
                     },
                     {
                         "data": "path",
                         "name": "path",
-                        "targets": 7,
+                        "targets": 6,
                     },
                     {
                         "data": "status_id",
                         "name": "status_id",
-                        "targets": 8
+                        "targets": 7
                     },
                     {
                         "data": 'actions',
-                        "targets": 9,
+                        "targets": 8,
                         "render": function(data, type, row, meta) {
                             if (data !== '') {
                                 let actionContent = `<div style='display: flex; gap:0.5em;'>`;
@@ -1029,7 +1023,7 @@
                     {
                         "searchable": false,
                         "orderable": false,
-                        "targets": [9]
+                        "targets": [8]
                     }
                 ],
                 search: {
@@ -1328,19 +1322,14 @@
                         "targets": 1
                     },
                     {
-                        "data": "id_request",
-                        "name": "id_request",
-                        "targets": 2
-                    },
-                    {
                         "data": "destination_partner_id",
                         "name": "destination_partner_id",
-                        "targets": 3
+                        "targets": 2
                     },
                     {
                         "data": "batch_name",
                         "name": "batch_name",
-                        "targets": 4
+                        "targets": 3
                     },
                     {
                         "data": "created_at",
@@ -1348,12 +1337,12 @@
                         "render": function(data, type, row, meta) {
                             return row.created_at.display
                         },
-                        "targets": 5,
+                        "targets": 4,
                     },
                     {
                         "data": "total_price",
                         "name": "total_price",
-                        "targets": 6,
+                        "targets": 5,
                     },
                     {
                         "data": "delivered_at",
@@ -1361,7 +1350,7 @@
                         "render": function(data, type, row, meta) {
                             return row.delivered_at.display
                         },
-                        "targets": 7,
+                        "targets": 6,
                     },
                     {
                         "data": "due_at",
@@ -1369,16 +1358,16 @@
                         "render": function(data, type, row, meta) {
                             return row.due_at.display
                         },
-                        "targets": 8,
+                        "targets": 7,
                     },
                     {
                         "data": "status_id",
                         "name": "status_id",
-                        "targets": 9
+                        "targets": 8
                     },
                     {
                         "data": 'actions',
-                        "targets": 10,
+                        "targets": 9,
                         "render": function(data, type, row, meta) {
                             if (data !== '') {
                                 let actionContent = `<div style='display: flex; gap:0.5em;'>`;
@@ -1404,7 +1393,7 @@
                     {
                         "searchable": false,
                         "orderable": false,
-                        "targets": [10]
+                        "targets": [9]
                     }
                 ],
                 search: {

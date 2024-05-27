@@ -120,7 +120,7 @@
 <body>
     <div id="kopSurat">
         <div id="logoKop">
-            <img src="{{ public_path('mediklik.png') }}" alt="Logo Mediklik">
+            <img src="{{ public_path('images/logo/icon.png') }}" alt="Logo Blueshift">
         </div>
         <div id="alamatKop">
             <div>

@@ -23,9 +23,9 @@ class AllSKUExport implements FromCollection, WithHeadings, WithStyles
         return collect($this->items)->map(function ($item, $index) {
             return [
                 (int) $index + 1 => [
-                    'SKU' => $item->sku,
+                    'ID' => $item->sku,
                     'Nama Item' => $item->name .' ('.$item->content.') ('.$item->packaging.').',
-                    'Golongan Obat' => $item->type->name,
+                    'Golongan Item' => $item->type->name,
                     'Satuan' => $item->unit,
                     'Pabrik' => $item->manufacturer,
                     'Supplier' => $item->supplier->name,
@@ -38,9 +38,9 @@ class AllSKUExport implements FromCollection, WithHeadings, WithStyles
     public function headings(): array
     {
         return [
-            'SKU',
+            'ID',
             'Nama Item',
-            'Golongan Obat',
+            'Golongan Item',
             'Satuan',
             'Pabrik',
             'Supplier',

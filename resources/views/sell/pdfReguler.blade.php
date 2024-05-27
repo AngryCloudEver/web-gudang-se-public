@@ -161,7 +161,7 @@
 <body>
     <div class="kopSurat">
         <div class="logoKop">
-            <img src="{{ public_path('mediklik.png') }}" alt="Logo Mediklik">
+            <img src="{{ public_path('images/logo/icon.png') }}" alt="Logo Blueshift">
         </div>
         <div class="alamatKop">
             <h4><b>INVOICE</b></h4>
@@ -286,7 +286,7 @@
                         @endforeach
                     </td>
                     <td colspan="2" rowspan="2" style="text-align: center; border: none;">
-                        <img id="cap" src="{{ public_path('cap_synapsa.png') }}" alt="Cap Mediklik">
+                        <img id="cap" src="{{ public_path('images/logo/Blueshift B.png') }}" alt="Cap Blueshift">
                     </td>
                 </tr>
                 <tr>

@@ -31,25 +31,13 @@ Route::get('/', function(){
     return redirect('/admin/dashboard');
 });
 
-Route::middleware(['auth', 'role:superadmin|Sales'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:Superadmin'])->prefix('admin')->group(function () {
         Route::prefix('dashboard')->group(function() {
           Route::get('/', [DashboardController::class, 'newIndex'])->name('dashboard');
           Route::get('/assetGudang', [DashboardController::class, 'assetGudang'])->name('dashboard.asset-gudang');
-          Route::get('/masterSKUList', [DashboardController::class, 'masterSKUList'])->name('dashboard.master-sku-list');
           Route::get('/penjualan', [DashboardController::class, 'penjualan'])->name('dashboard.penjualan');
-          Route::get('/sp', [DashboardController::class, 'sp'])->name('dashboard.sp');
-          Route::get('/listPermintaan', [DashboardController::class, 'listPermintaan'])->name('dashboard.list-permintaan');
-          Route::get('/listPengiriman', [DashboardController::class, 'listPengiriman'])->name('dashboard.list-pengiriman');
-          Route::get('/so', [DashboardController::class, 'so'])->name('dashboard.so');
-          Route::get('/listPermintaanKlinik', [DashboardController::class, 'listPermintaanKlinik'])->name('dashboard.permintaan-klinik');
-          Route::get('/listPengirimanKlinik', [DashboardController::class, 'listPengirimanKlinik'])->name('dashboard.pengiriman-klinik');
-          Route::get('/listPenjualanKlinik', [DashboardController::class, 'listPenjualanKlinik'])->name('dashboard.penjualan-klinik');
-          Route::get('/listPenjualanKlinikDoc', [DashboardController::class, 'listPenjualanKlinikDoc'])->name('dashboard.penjualan-klinik-doc');
-          Route::get('/listMitra', [DashboardController::class, 'listMitra'])->name('dashboard.mitra-list');
-          Route::get('/listSOKlinik', [DashboardController::class, 'listSOKlinik'])->name('dashboard.so-klinik');
-          Route::get('/obatTerlaris', [DashboardController::class, 'obatTerlaris'])->name('dashboard.obat-terlaris');
-          Route::get('/listSupplier', [DashboardController::class, 'listSupplier'])->name('dashboard.supplier-list');
-          Route::get('/listSOKlinikSchedule', [DashboardController::class, 'listSOKlinikSchedule'])->name('dashboard.so-klinik-schedule');
+          Route::get('/penjualanPembelian', [DashboardController::class, 'penjualanPembelian'])->name('dashboard.penjualan-pembelian');
+          
         });
   		
         Route::prefix('item')->group(function() {
@@ -60,7 +48,7 @@ Route::middleware(['auth', 'role:superadmin|Sales'])->prefix('admin')->group(fun
   		
 });
 
-Route::middleware(['auth', 'role:superadmin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:Superadmin'])->prefix('admin')->group(function () {
         
         Route::get('/getAllSupplier', [DashboardController::class, 'getAllSupplier'])->name('get-all-supplier');
         Route::get('/getAllType', [DashboardController::class, 'getAllType'])->name('get-all-type');
@@ -76,7 +64,7 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('admin')->group(function 
             Route::get('/{supplier}/destroy', [SupplierController::class, 'destroy'])->name('supplier.destroy');
         });
         
-        Route::resource('item', ItemController::class)->except(['create', 'show', 'destroy']);
+        Route::resource('item', ItemController::class)->except(['create', 'show', 'destroy', 'edit',' update']);
         Route::prefix('item')->group(function () {
             Route::get('/{item}/destroy', [ItemController::class, 'destroy'])->name('item.destroy');
             Route::get('/export', [ItemController::class, 'exportSKU'])->name('item.sku.export');
@@ -181,17 +169,17 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('admin')->group(function 
             });
         });
 
-        Route::prefix('others')->group(function () {
-            Route::prefix('price')->group(function () {
-                Route::get('/', [OtherController::class, 'indexPrice'])->name('other.price');
-                Route::post('/', [OtherController::class, 'storePrice'])->name('other.price.store');
-            });
+        // Route::prefix('others')->group(function () {
+        //     Route::prefix('price')->group(function () {
+        //         Route::get('/', [OtherController::class, 'indexPrice'])->name('other.price');
+        //         Route::post('/', [OtherController::class, 'storePrice'])->name('other.price.store');
+        //     });
 
-            Route::prefix('stock')->group(function () {
-                Route::get('/', [OtherController::class, 'indexStock'])->name('other.stock');
-                Route::post('/', [OtherController::class, 'storeStock'])->name('other.stock.store');
-            });
-        });
+        //     Route::prefix('stock')->group(function () {
+        //         Route::get('/', [OtherController::class, 'indexStock'])->name('other.stock');
+        //         Route::post('/', [OtherController::class, 'storeStock'])->name('other.stock.store');
+        //     });
+        // });
 
         Route::resource('role', RoleController::class)->except(['show', 'destroy']);
         Route::get('/role/{role}/destroy', [RoleController::class, 'destroy'])->name('role.destroy');
