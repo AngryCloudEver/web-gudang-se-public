@@ -194,7 +194,7 @@
                 @foreach($passedData->items as $index => $item)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->name . ' (' . $item->supplier->name . ')', }}</td>
+                    <td>{{ $item->name . ' (' . $item->supplier->name . ')' }}</td>
                     <td style="text-align: center;">{{ getBentukSediaan($item->packaging) }}</td>
                     <td>{{ $item->content }}</td>
                     <td>{{ $item->pivot->quantity . ' ( ' . getSpokenNumber($item->pivot->quantity) . ' )' }}</td>
