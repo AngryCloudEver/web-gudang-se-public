@@ -17,7 +17,7 @@ class PartnerItem extends Model
 
     protected $table = 'partner_item';
 
-    protected $fillable = ['item_id', 'partner_id', 'shelf_id', 'barcode_id', 'batch', 'exp_date', 'stock_qty', 'discount_price', 'is_consigned', 'created_at'];
+    protected $fillable = ['item_id', 'partner_id', 'shelf_id', 'barcode_id', 'batch', 'exp_date', 'stock_qty', 'discount_price', 'is_consigned', 'created_at', 'deleted_at'];
 
     protected static function booted(): void
     {

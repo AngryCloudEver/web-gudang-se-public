@@ -47,13 +47,13 @@ class ItemController extends Controller
             return DataTables::of($dataItem)
                 ->addColumn('actions', function ($p) {
                     return [
-                        [
-                            "route" => route('item.edit', ['item' => $p->id]),
-                            "attr_id" => $p->id,
-                            "icon" => 'fas fa-fw fa-edit',
-                            "label" => 'Edit',
-                            "btnStyle" => 'info'
-                        ],
+                        // [
+                        //     "route" => route('item.edit', ['item' => $p->id]),
+                        //     "attr_id" => $p->id,
+                        //     "icon" => 'fas fa-fw fa-edit',
+                        //     "label" => 'Edit',
+                        //     "btnStyle" => 'info'
+                        // ],
                         [
                             "route" => route('item.destroy', ['item' => $p->id]),
                             "attr_id" => $p->id,
@@ -102,39 +102,39 @@ class ItemController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Item $item)
-    {
-        $types = Type::all();
-        $suppliers = Supplier::all();
+    // public function edit(Item $item)
+    // {
+    //     $types = Type::all();
+    //     $suppliers = Supplier::all();
         
-        return view('item.master.edit', compact('item', 'types', 'suppliers'));
-    }
+    //     return view('item.master.edit', compact('item', 'types', 'suppliers'));
+    // }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ItemMasterRequest $request, Item $item): RedirectResponse
-    {
-        $result = [
-            'type' => 'success',
-            'message'   => 'Berhasil mengubah master data obat!'
-        ];
-        $data = $request->all();
+    // public function update(ItemMasterRequest $request, Item $item): RedirectResponse
+    // {
+    //     $result = [
+    //         'type' => 'success',
+    //         'message'   => 'Berhasil mengubah master data obat!'
+    //     ];
+    //     $data = $request->all();
 
-        DB::beginTransaction();
-        try{
-            $item->update($data);
-            DB::commit();
-        } catch(\Exception $e){
-            DB::rollBack();
-            LogError::insertLogError($e->getMessage());
+    //     DB::beginTransaction();
+    //     try{
+    //         $item->update($data);
+    //         DB::commit();
+    //     } catch(\Exception $e){
+    //         DB::rollBack();
+    //         LogError::insertLogError($e->getMessage());
 
-            $result['type']    = 'error';
-            $result['message'] = 'Gagal mengubah master data obat, mohon coba kembali!';
-        }
+    //         $result['type']    = 'error';
+    //         $result['message'] = 'Gagal mengubah master data obat, mohon coba kembali!';
+    //     }
 
-        return redirect()->route('item.index')->with($result['type'], $result['message']);
-    }
+    //     return redirect()->route('item.index')->with($result['type'], $result['message']);
+    // }
 
     /**
      * Remove the specified resource from storage.
@@ -220,13 +220,13 @@ class ItemController extends Controller
                         "btnStyle" => 'info'
                     ]);
 
-                    array_push($returnedValue, [
-                        "route" => route('item.stock.print-barcode-each', ['stock' => $p->id]),
-                        "attr_id" => $p->id,
-                        "icon" => 'fas fa-fw fa-print',
-                        "label" => 'Barcode',
-                        "btnStyle" => 'success'
-                    ]);
+                    // array_push($returnedValue, [
+                    //     "route" => route('item.stock.print-barcode-each', ['stock' => $p->id]),
+                    //     "attr_id" => $p->id,
+                    //     "icon" => 'fas fa-fw fa-print',
+                    //     "label" => 'Barcode',
+                    //     "btnStyle" => 'success'
+                    // ]);
 
                     array_push($returnedValue, [
                         "route" => route('item.stock.destroy', ['stock' => $p->id]),
@@ -292,7 +292,7 @@ class ItemController extends Controller
     public function exportSKU(){
         $masterSKU = Item::all();
 
-        return Excel::download(new AllSKUExport($masterSKU), 'Semua Item SKU.xlsx');
+        return Excel::download(new AllSKUExport($masterSKU), 'Semua Item.xlsx');
     }
 
     public function exportStock(){
@@ -711,7 +711,7 @@ class ItemController extends Controller
 
         DB::beginTransaction();
         try{
-            PartnerItem::where('partner_item.id', $itemPartnerId)->delete();
+            PartnerItem::withoutGlobalScope('order')->where('partner_item.id', $itemPartnerId)->delete();
             DB::commit();
         } catch(\Exception $e){
             DB::rollBack();

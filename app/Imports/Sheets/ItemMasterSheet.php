@@ -25,9 +25,9 @@ class ItemMasterSheet implements ToModel, WithUpserts, WithHeadingRow
         $supplier = Supplier::where('name', 'LIKE', '%'.$row['supplier'].'%')->first();
         $type = Type::where('name', 'LIKE', '%'.$row['gol'].'%')->first();
         $item = Item::updateOrCreate([
-                'sku'          => $row['id_mediklik'],
+                'sku'          => $row['id_item'],
         ], [
-            'name'         => $row['nama_obat'],
+            'name'         => $row['nama_item'],
             'content'      => $row['kandungan'],
             'packaging'    => $row['kemasan'] .', '. $row['sediaan'],
             'supplier_id' => $supplier->id,

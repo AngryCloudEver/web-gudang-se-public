@@ -121,7 +121,7 @@
 <body>
     <div id="kopSurat">
         <div id="logoKop">
-            <img src="{{ public_path('mediklik.png') }}" alt="Logo Mediklik">
+            <img src="{{ public_path('images/logo/icon.png') }}" alt="Logo Mediklik">
         </div>
         <div id="alamatKop">
             <h4><b>DOKUMEN KONFIRMASI</b></h4>

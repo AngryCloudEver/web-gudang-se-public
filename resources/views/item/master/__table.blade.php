@@ -3,7 +3,7 @@
         <thead style="white-space:nowrap">
             <tr>
                 <th width="32">No</th>
-                <th width="64">SKU</th>
+                <th width="64">Item ID</th>
                 <th>Nama</th>
                 <th>Golongan Obat</th>
                 <th>Satuan</th>
